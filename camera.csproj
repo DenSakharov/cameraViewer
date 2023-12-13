@@ -12,6 +12,7 @@
     <PackageReference Include="AForge.Video" Version="2.2.5" />
     <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
     <PackageReference Include="Emgu.CV" Version="4.8.1.5350" />
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.8.1.5350" />
     <PackageReference Include="HelixToolkit" Version="2.24.0" />
     <PackageReference Include="HelixToolkit.Wpf" Version="2.24.0" />
     <PackageReference Include="OpenCvSharp4" Version="4.8.0.20230708" />
