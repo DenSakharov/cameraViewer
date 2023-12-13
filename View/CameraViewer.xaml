@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cam="clr-namespace:camera.View" 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              Unloaded="OnUnloaded"
@@ -18,7 +19,10 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
-        <Image x:Name="cameraImage" Stretch="UniformToFill" Grid.ColumnSpan="3" Grid.RowSpan="3" Margin="20"/>
+        <Image x:Name="cameraImage00" Grid.Column="0" Grid.Row="0" Margin="20"/>
+        <Image x:Name="cameraImage01" Grid.Column="1" Grid.Row="0" Margin="20"/>
+        <Image x:Name="cameraImage02" Grid.Column="2" Grid.Row="0" Margin="20"/>
+        <!--<cam:RotateImage Grid.Column="2" Grid.Row="0" Margin="20" />-->
         <Button Grid.Column="1" Grid.Row="2"
             Content="Start/Stop Camera" Click="btnStartStop_Click" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
     </Grid>
