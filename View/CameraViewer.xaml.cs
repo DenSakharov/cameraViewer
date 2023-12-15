@@ -19,6 +19,7 @@ using LiveCharts.Wpf.Charts.Base;
 using LiveCharts.Wpf;
 using LiveCharts.Defaults;
 using System.Collections.ObjectModel;
+using camera.Model;
 
 namespace camera.View
 {
@@ -88,7 +89,7 @@ namespace camera.View
                 return bitmapImage;
             }
         }
-        bool calibrate = false;
+        CameraParameters cameraParameters = new CameraParameters();
         private void VideoSource_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
             // Обновляем изображение в Image
@@ -150,27 +151,18 @@ namespace camera.View
                     StringBuilder sb = new StringBuilder();
                     sb.Clear();
 
-                    Mat grayMat = new Mat();
-                    Cv2.CvtColor(matFrame1, grayMat, ColorConversionCodes.BGR2GRAY);
+                    //Mat grayMat = new Mat();
+                    //Cv2.CvtColor(matFrame1, grayMat, ColorConversionCodes.BGR2GRAY);
 
-                    bool foundCorners = Cv2.FindChessboardCorners(grayMat, patternSize, out Point2f[] corners);
-
-                    //sb.AppendLine($"Количество найденных углов: {corners.Length} ");
-                    //MessageBox.Show($"Количество найденных углов: {corners.Length} ");
-                    foreach (var corner in corners)
-                    {
-                        sb.AppendLine($"Угол: {corner}");
-                    }
-                    //MessageBox.Show( sb.ToString() );
-
+                    bool foundCorners = Cv2.FindChessboardCorners(matFrame1, patternSize, out Point2f[] corners);
                     int horizontalCorners = (int)patternSize.Width;
                     int verticalCorners = (int)patternSize.Height;
                     try
                     {
-                        //MessageBox.Show($"Количество углов по горизонтали: {horizontalCorners}+\nКоличество углов по вертикали: {verticalCorners}");
                         if (foundCorners)
                         {
                             #region DRAW Chess board Corners
+
                             // Рисуем углы на изображении (для визуализации)
                             //визуальное отображение точек шахматной доски
                             Cv2.DrawChessboardCorners(matFrame1, patternSize
@@ -242,54 +234,17 @@ namespace camera.View
                                         modifiedCorners.Add(modifiedPoint);
                                     }
                                 }
-                                //foreach (var row in rows1)
-                                //{
-                                //    // Найти минимальное и максимальное значение X
-                                //    float minX = row.Min(point => point.X);
-                                //    float maxX = row.Max(point => point.X);
-
-                                //    // Выровнять угловые точки
-                                //    for (int i = 0; i < row.Count; i++)
-                                //    {
-                                //        Point2f modifiedPoint = row[i];
-                                //        modifiedPoint.X = minX + i * ((maxX - minX) / (pointsPerRow - 1));
-                                //        modifiedCorners.Add(modifiedPoint);
-                                //    }
-                                //}
+                              
 
                                 /// Размеры шахматной доски
                                 int rows = 9;
                                 int cols = 6;
 
-                                // Создаем массив для dstPoints
-                                List<Point2f> dstPointsList = new List<Point2f>();
-
-                                /////
-                                //float minX = cornersTest.Min(point => point.X);
-                                //float minY = cornersTest.Min(point => point.Y);
-
-                                //float[] xValues = cornersTest.Select(point => point.X).ToArray();
-                                //float[] yValues = cornersTest.Select(point => point.Y).ToArray();
-
-                                //Array.Sort(xValues);
-                                //Array.Sort(yValues);
-
-                                //float secondMinX = xValues[1];
-                                //float secondMinY = yValues[1];
-                                //for (int row = 0; row < rows; row++)
-                                //{
-                                //    for (int col = 0; col < cols; col++)
-                                //    {
-                                //        dstPointsList.Add(new Point2f(col*minY, row*minX));
-                                //    }
-                                //}
 
                                 //визуализация точек матриц шахмат и нового
 
                                 //GraphicsAxesViewer g=new GraphicsAxesViewer(modifiedCorners, cornersTest.ToList() );
                                 //g.ShowDialog();
-
-                                IEnumerable<Point2f> dstPoints = dstPointsList.ToArray();
 
                                 InputArray inputArray1 = InputArray.Create(cornersTest);
                                 InputArray inputArray2 = InputArray.Create(modifiedCorners//dstPoints
@@ -418,7 +373,7 @@ namespace camera.View
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        //cameraImage00.Source = null;
+                        cameraImage00.Source = null;
                         //cameraImage01.Source = null;
                         cameraImage02.Source = null;
                     });
@@ -428,25 +383,6 @@ namespace camera.View
 
                 }
             }
-        }
-
-        private Point2f[] GetTopViewPointsFromScreen(Size screenSize, Size patternSize)
-        {
-            double squareWidth = (screenSize.Width) / (patternSize.Width - 1);
-            double squareHeight = (screenSize.Height) / (patternSize.Height - 1);
-
-            Point2f[] points = new Point2f[patternSize.Width * patternSize.Height];
-
-            int index = 0;
-            for (int i = 0; i < patternSize.Height; i++)
-            {
-                for (int j = 0; j < patternSize.Width; j++)
-                {
-                    points[index++] = new Point2f((float)(j * squareWidth), (float)(i * squareHeight));
-                }
-            }
-
-            return points;
         }
         private void Timer_Tick(object sender, EventArgs e)
         {
@@ -463,17 +399,6 @@ namespace camera.View
             // Запускаем таймер при нажатии на кнопку
             if (!stop)
             {
-                //Thread thread1 = new Thread(() =>
-                //{
-                //    timer1.Start();
-                //});
-                //Thread thread2 = new Thread(() =>
-                //{
-                //    RotateImage1.timer2.Start();
-                //});
-                //thread1.Start();
-                //videoSource.Start();
-                //thread2.Start();
                 timer1.Start();
                 stop = true;
             }
