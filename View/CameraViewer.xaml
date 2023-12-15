@@ -21,7 +21,7 @@
         </Grid.RowDefinitions>
         <Image x:Name="cameraImage00" Grid.Column="0" Grid.Row="0" Margin="20"/>
         <Image x:Name="cameraImage01" Grid.Column="1" Grid.Row="0" Margin="20"/>
-        <Image x:Name="cameraImage02" Grid.Column="2" Grid.Row="0" Margin="20"/>
+        <Image x:Name="cameraImage02" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="3" Margin="20"/>
         <!--<cam:RotateImage x:Name="RotateImage1" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" Width="250" Height="150" VerticalAlignment="Center"  />-->
         <Button Grid.Column="1" Grid.Row="2"
             Content="Start/Stop Camera" Click="btnStartStop_Click" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
