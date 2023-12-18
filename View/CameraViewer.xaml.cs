@@ -93,7 +93,7 @@ namespace camera.View
         private void VideoSource_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
             // Обновляем изображение в Image
-            if (stop)
+            if (stop && !new_stop)
             {
                 ///участок код для контуров
                 Mat matFrame = BitmapSourceToMat(BitmapToImageSource((Bitmap)eventArgs.Frame.Clone()));
@@ -149,10 +149,6 @@ namespace camera.View
                     float squareSize = 1.0f; // размер квадрата на шахматной доске в метрах
 
                     StringBuilder sb = new StringBuilder();
-                    sb.Clear();
-
-                    //Mat grayMat = new Mat();
-                    //Cv2.CvtColor(matFrame1, grayMat, ColorConversionCodes.BGR2GRAY);
 
                     bool foundCorners = Cv2.FindChessboardCorners(matFrame1, patternSize, out Point2f[] corners);
                     int horizontalCorners = (int)patternSize.Width;
@@ -216,42 +212,51 @@ namespace camera.View
                                 List<Point2f> modifiedCorners = new List<Point2f>();
 
                                 // Выравниваем угловые точки в каждой строке
-                                foreach (var row in rows1)
+                                //foreach (var row in rows1)
+                                for (int j = 0; j < rows1.Count; j++)
                                 {
                                     // Найти минимальное и максимальное значение X
-                                    float minX = row.Min(point => point.X);
-                                    float maxX = row.Max(point => point.X);
+                                    float minX = rows1[j].Min(point => point.X);
+                                    float maxX = rows1[j].Max(point => point.X);
 
                                     // Значение y первой точки в строке
-                                    float firstPointY = row.First().Y;
+                                    float firstPointY = rows1[j].First().Y;
 
+                                    var row = rows1[j];
                                     // Выровнять угловые точки
                                     for (int i = 0; i < row.Count; i++)
                                     {
                                         Point2f modifiedPoint = row[i];
                                         modifiedPoint.X = minX + i * ((maxX - minX) / (pointsPerRow - 1));
+                                        try
+                                        {
+                                            var previousRow = rows1[j - 1];
+                                            Point2f modifiedPointTRY = previousRow[i];
+                                            modifiedPoint.X = modifiedPointTRY.X;
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
                                         modifiedPoint.Y = firstPointY; // Установить y первой точки
                                         modifiedCorners.Add(modifiedPoint);
                                     }
                                 }
-                              
-
-                                /// Размеры шахматной доски
-                                int rows = 9;
-                                int cols = 6;
-
 
                                 //визуализация точек матриц шахмат и нового
-
                                 //GraphicsAxesViewer g=new GraphicsAxesViewer(modifiedCorners, cornersTest.ToList() );
                                 //g.ShowDialog();
 
                                 InputArray inputArray1 = InputArray.Create(cornersTest);
-                                InputArray inputArray2 = InputArray.Create(modifiedCorners//dstPoints
+                                InputArray inputArray2 = InputArray.Create(idealChessDesk
+                                    //modifiedCorners
                                     );
 
                                 // Находим матрицу гомографии
                                 Mat homographyMatrix = Cv2.FindHomography(inputArray1, inputArray2);
+
+                                //запоминаем матрицу
+                                homographyMatrixGlobalforImageWithoutChessDesk = homographyMatrix;
 
                                 // Применяем гомографию к изображению
                                 Mat correctedImage = new Mat();
@@ -363,27 +368,67 @@ namespace camera.View
                            */
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    { 
+                        string s = ex.Message;
+                    }
                 });
                 #endregion
             }
-            else
+            if (!stop && new_stop)
             {
-                try
+                Dispatcher.Invoke(() =>
                 {
-                    Dispatcher.Invoke(() =>
-                    {
-                        cameraImage00.Source = null;
-                        //cameraImage01.Source = null;
-                        cameraImage02.Source = null;
-                    });
-                }
-                catch (Exception ex)
-                {
+                    Mat matFrame0 = BitmapSourceToMat(BitmapToImageSource((Bitmap)eventArgs.Frame.Clone()));
+                    var undistortedBitmapSource1 = MatToBitmapImage(matFrame0);
+                    cameraImage00.Source = null;
+                    cameraImage00.Source = undistortedBitmapSource1;
+                });
 
-                }
+                Mat matFrame = BitmapSourceToMat(BitmapToImageSource((Bitmap)eventArgs.Frame.Clone()));
+                Mat correctedImage = new Mat();
+                Cv2.WarpPerspective(matFrame, correctedImage, homographyMatrixGlobalforImageWithoutChessDesk, new Size(correctedImage.Cols, correctedImage.Rows));
+
+                //Mat rotatedImage = new Mat();
+                //Cv2.Rotate(correctedImage, rotatedImage, RotateFlags.Rotate180);
+
+                // Отображаем скорректированное изображение
+                Dispatcher.Invoke(() =>
+                {
+                    var undistortedBitmapSource1 = MatToBitmapImage(correctedImage);
+                    cameraImage02.Source = null;
+                    cameraImage02.Source = undistortedBitmapSource1;
+                });
+            }
+            if (standart_stop)
+            {
+                Mat matFrame = BitmapSourceToMat(BitmapToImageSource((Bitmap)eventArgs.Frame.Clone()));
+                Dispatcher.Invoke(() =>
+                {
+                    var undistortedBitmapSource1 = MatToBitmapImage(matFrame);
+                    cameraImage00.Source = null;
+                    cameraImage00.Source = undistortedBitmapSource1;
+                });
+                Dispatcher.Invoke(() =>
+                {
+                    var patternSize = new Size(9, 6);
+                    bool foundCornersTest = Cv2.FindChessboardCorners(matFrame, patternSize, out Point2f[] cornersTest);
+                    if (foundCornersTest)
+                    {
+                        Cv2.DrawChessboardCorners(matFrame, patternSize
+                       , cornersTest, foundCornersTest);
+                        var undistortedBitmapSource1 = MatToBitmapImage(matFrame);
+                        cameraImage02.Source = null;
+                        cameraImage02.Source = undistortedBitmapSource1;
+
+                        //получили массив точек идеального изображения
+                        idealChessDesk = cornersTest;
+                    }
+                });
             }
         }
+        Point2f[] idealChessDesk;
+        Mat homographyMatrixGlobalforImageWithoutChessDesk;// =new Mat();
         private void Timer_Tick(object sender, EventArgs e)
         {
             // Запускаем камеру при первом тике таймера
@@ -394,21 +439,57 @@ namespace camera.View
         }
 
         bool stop = false;
+        bool new_stop = false;
+        bool standart_stop = false;
         private void btnStartStop_Click(object sender, RoutedEventArgs e)
         {
             // Запускаем таймер при нажатии на кнопку
             if (!stop)
             {
+                new_stop = false;
                 timer1.Start();
                 stop = true;
             }
-            else
+            if (new_stop)
             {
                 stop = false;
                 timer1.Stop();
+
+                timer1.Start();
             }
         }
+        private void btnSaveParamsFromCameraImage(object sender, RoutedEventArgs e)
+        {
+            if (new_stop)
+            {
+                new_stop=false;
+            }
+            if (homographyMatrixGlobalforImageWithoutChessDesk != null)
+            {
+                new_stop = true;
+                timer1.Stop();
 
+                timer1.Start();
+                refactor_image();
+            }
+        }
+        void click_get_standart_param(object sender, RoutedEventArgs e)
+        {
+            if (!standart_stop)
+            {
+                standart_stop = true;
+                timer1.Start();
+            }
+            else
+            {
+                standart_stop = false;
+                timer1.Stop();
+            }
+        }
+        void refactor_image()
+        {
+
+        }
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             // Останавливаем камеру при закрытии окна
