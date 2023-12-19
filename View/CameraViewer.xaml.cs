@@ -187,14 +187,18 @@ namespace camera.View
                             cameraImage02.Source = enlargedBitmapSource;
 
                             patternSize = new Size(9, 6);
-                            bool foundCornersTest = Cv2.FindChessboardCorners(enlargedImage, patternSize, out Point2f[] cornersTest);
+                            bool foundCornersTest = Cv2.FindChessboardCorners(matFrameTEST//enlargedImage
+                                , patternSize, out Point2f[] cornersTest);
                             if (foundCornersTest)
                             {
-                                Cv2.DrawChessboardCorners(enlargedImage, patternSize
+                                Cv2.DrawChessboardCorners(matFrameTEST//enlargedImage
+                                    , patternSize
                                , cornersTest, foundCornersTest);
-                                undistortedBitmapSource1 = MatToBitmapImage(enlargedImage);
+                                undistortedBitmapSource1 = MatToBitmapImage(matFrameTEST//enlargedImage
+                                    );
                                 cameraImage02.Source = undistortedBitmapSource1;
 
+                                /*
                                 Point2f[] sortedCorners = cornersTest.OrderBy(p => p.Y).ToArray();
 
                                 // Предполагаем, что доска имеет 9 точек в каждой строке
@@ -242,11 +246,39 @@ namespace camera.View
                                         modifiedCorners.Add(modifiedPoint);
                                     }
                                 }
+                                */
 
                                 //визуализация точек матриц шахмат и нового
                                 //GraphicsAxesViewer g=new GraphicsAxesViewer(modifiedCorners, cornersTest.ToList() );
                                 //g.ShowDialog();
+                                #region getMatrixIdealChessDesk
+                                Mat matFrame = Cv2.ImRead("C:\\projects\\sharpCameraPrinter\\camera\\idealChesss.png");
+                                Dispatcher.Invoke(() =>
+                                {
 
+                                    //получили массив точек идеального изображения
+
+                                    var patternSize = new Size(9, 6);
+                                    bool foundCornersTest = Cv2.FindChessboardCorners(matFrame, patternSize, out Point2f[] cornersTest);
+                                    if (foundCornersTest)
+                                    {
+                                        Cv2.DrawChessboardCorners(matFrame, patternSize
+                                       , cornersTest, foundCornersTest);
+
+                                        undistortedBitmapSource1 = MatToBitmapImage(matFrame);
+
+                                        //cameraImage02.Source = null;
+                                        //cameraImage02.Source = undistortedBitmapSource1;
+
+                                        ////получили массив точек идеального изображения
+                                        idealChessDesk = cornersTest;
+                                        cameraImageIdeal.Source = null;
+                                        cameraImageIdeal.Source = undistortedBitmapSource1;
+
+                                        //selected_contur(matFrame);
+                                    }
+                                });
+                                #endregion
                                 InputArray inputArray1 = InputArray.Create(cornersTest);
                                 InputArray inputArray2 = InputArray.Create(idealChessDesk
                                     //modifiedCorners
@@ -260,10 +292,22 @@ namespace camera.View
 
                                 // Применяем гомографию к изображению
                                 Mat correctedImage = new Mat();
-                                Cv2.WarpPerspective(enlargedImage, correctedImage, homographyMatrix, new Size(correctedImage.Cols, correctedImage.Rows));
+                                Cv2.WarpPerspective(matFrameTEST//enlargedImage
+                                    , correctedImage, homographyMatrix, new Size(correctedImage.Cols, correctedImage.Rows));
+
+                                double scale_factor = 0.5;
+
+                                // Получение новых размеров с сохранением пропорций
+                                int newWidth = (int)(matFrame1.Width * scale_factor);
+                                int newHeight = (int)(matFrame1.Height * scale_factor);
+
+                                // Уменьшение изображения с интерполяцией Inter.Linear
+                                Mat resizedImage = new Mat();
+                                Cv2.Resize(correctedImage, resizedImage, new Size(newWidth, newHeight), interpolation: InterpolationFlags.Linear);
+
 
                                 // Отображаем скорректированное изображение
-                                undistortedBitmapSource1 = MatToBitmapImage(correctedImage);
+                                undistortedBitmapSource1 = MatToBitmapImage(resizedImage);
                                 cameraImage02.Source = undistortedBitmapSource1;
                             }
                             #endregion
@@ -369,7 +413,7 @@ namespace camera.View
                         }
                     }
                     catch (Exception ex)
-                    { 
+                    {
                         string s = ex.Message;
                     }
                 });
@@ -387,7 +431,7 @@ namespace camera.View
 
                 Mat matFrame = BitmapSourceToMat(BitmapToImageSource((Bitmap)eventArgs.Frame.Clone()));
                 Mat correctedImage = new Mat();
-                Cv2.WarpPerspective(matFrame, correctedImage, homographyMatrixGlobalforImageWithoutChessDesk, new Size(correctedImage.Cols, correctedImage.Rows));
+                Cv2.WarpPerspective(matFrame, correctedImage, homographyMatrixGlobalforImageWithoutChessDesk, new Size(correctedImage.Cols, correctedImage.Rows), flags: InterpolationFlags.Linear);
 
                 //Mat rotatedImage = new Mat();
                 //Cv2.Rotate(correctedImage, rotatedImage, RotateFlags.Rotate180);
@@ -399,33 +443,100 @@ namespace camera.View
                     cameraImage02.Source = null;
                     cameraImage02.Source = undistortedBitmapSource1;
                 });
+
+                /// выделение цветов
+                //selected_contur(correctedImage);
             }
             if (standart_stop)
             {
-                Mat matFrame = BitmapSourceToMat(BitmapToImageSource((Bitmap)eventArgs.Frame.Clone()));
+                //Mat matFrame = BitmapSourceToMat(BitmapToImageSource((Bitmap)eventArgs.Frame.Clone()));
+                Mat matFrame = Cv2.ImRead("C:\\projects\\sharpCameraPrinter\\camera\\idealChesss.png");
                 Dispatcher.Invoke(() =>
                 {
                     var undistortedBitmapSource1 = MatToBitmapImage(matFrame);
                     cameraImage00.Source = null;
                     cameraImage00.Source = undistortedBitmapSource1;
-                });
-                Dispatcher.Invoke(() =>
-                {
+
+                    //получили массив точек идеального изображения
+                    //selected_contur(matFrame);
                     var patternSize = new Size(9, 6);
                     bool foundCornersTest = Cv2.FindChessboardCorners(matFrame, patternSize, out Point2f[] cornersTest);
                     if (foundCornersTest)
                     {
                         Cv2.DrawChessboardCorners(matFrame, patternSize
                        , cornersTest, foundCornersTest);
-                        var undistortedBitmapSource1 = MatToBitmapImage(matFrame);
+
+                        undistortedBitmapSource1 = MatToBitmapImage(matFrame);
                         cameraImage02.Source = null;
                         cameraImage02.Source = undistortedBitmapSource1;
 
                         //получили массив точек идеального изображения
                         idealChessDesk = cornersTest;
+                        cameraImageIdeal.Source = null;
+                        cameraImageIdeal.Source = undistortedBitmapSource1;
+                        //selected_contur(matFrame);
                     }
                 });
             }
+        }
+        void selected_contur(Mat matFrame)
+        {
+            // Определите размеры изображения
+            int imageWidth = matFrame.Cols;
+            int imageHeight = matFrame.Rows;
+
+            // Определите размеры трапеции и ее положение в центре
+            int trapWidth = 1400; // ширина трапеции
+            int trapHeight = 800; // высота трапеции
+            int centerX = imageWidth / 2; // центр изображения по ширине
+            int centerY = imageHeight / 2 + 100; // центр изображения по высоте
+
+            // Определите угловые точки трапеции
+            OpenCvSharp.Point[] trapPoints = new OpenCvSharp.Point[]
+            {
+    new OpenCvSharp.Point(centerX - trapWidth / 2, centerY + trapHeight / 2), // левая нижняя точка
+    new OpenCvSharp.Point(centerX + trapWidth / 2, centerY + trapHeight / 2), // правая нижняя точка
+    new OpenCvSharp.Point(centerX + trapWidth / 4, centerY - trapHeight / 2), // правая верхняя точка
+    new OpenCvSharp.Point(centerX - trapWidth / 4, centerY - trapHeight / 2)  // левая верхняя точка
+            };
+
+            // Создайте маску трапеции
+            Mat trapMask = new Mat(matFrame.Size(), matFrame.Type(), Scalar.Black);
+            trapMask.FillPoly(new OpenCvSharp.Point[][] { trapPoints }, Scalar.White);
+
+            // Примените маску к исходному изображению
+            Mat roiImage = new Mat();
+            matFrame.CopyTo(roiImage, trapMask);
+
+            // Отобразить результат
+            var undistortedBitmapSource = MatToBitmapImage(roiImage);
+            cameraImage02.Source = null;
+            cameraImage02.Source = undistortedBitmapSource;
+
+            // Преобразование roiImage в оттенки серого и бинаризация
+            Cv2.CvtColor(roiImage, roiImage, ColorConversionCodes.BGR2GRAY);
+
+            // Бинаризация изображения
+            Mat binaryImage = roiImage.Threshold(128, 255, ThresholdTypes.Binary);
+
+            // Поиск контуров в binaryImage
+            OpenCvSharp.Point[][] contours;
+            HierarchyIndex[] hierarchy;
+            Cv2.FindContours(binaryImage, out contours, out hierarchy, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
+
+            // Создание нового цветного изображения для рисования контуров
+            Mat resultImage = roiImage.CvtColor(ColorConversionCodes.GRAY2BGR);
+
+            // Рисование контуров на цветном изображении
+            Cv2.DrawContours(resultImage, contours, -1, Scalar.Red, 2);
+
+            Dispatcher.Invoke(() =>
+            {
+                // Отобразить результат
+                undistortedBitmapSource = MatToBitmapImage(resultImage);
+                cameraImage02.Source = null;
+                cameraImage02.Source = undistortedBitmapSource;
+            });
         }
         Point2f[] idealChessDesk;
         Mat homographyMatrixGlobalforImageWithoutChessDesk;// =new Mat();
@@ -462,7 +573,7 @@ namespace camera.View
         {
             if (new_stop)
             {
-                new_stop=false;
+                new_stop = false;
             }
             if (homographyMatrixGlobalforImageWithoutChessDesk != null)
             {

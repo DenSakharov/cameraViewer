@@ -8,9 +8,37 @@
              d:DesignHeight="450" d:DesignWidth="800"
              Unloaded="OnUnloaded"
              >
+    <UserControl.Resources>
+        <Style x:Key="GreenButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Green"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="DarkGreen"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="DarkGreen"/>
+                    <!-- Добавьте другие эффекты, если необходимо -->
+                </Trigger>
+                <!-- Другие триггеры, если необходимо -->
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="GreenLabelStyle" TargetType="Label">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="DarkGreen"/>
+                    <!-- Добавьте другие эффекты, если необходимо -->
+                </Trigger>
+                <!-- Другие триггеры, если необходимо -->
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
@@ -19,15 +47,37 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
-        <Image x:Name="cameraImage00" Grid.Column="0" Grid.Row="0" Margin="20"/>
-        <Image x:Name="cameraImageWithoutChess" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="3" Margin="20"/>
-        <Image x:Name="cameraImage02" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="3" Margin="20"/>
+
+        <Label Grid.Row="0" Grid.Column="0" Content="Исходное изображение"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Top"
+               Style="{StaticResource GreenLabelStyle}" 
+            />
+        <Image x:Name="cameraImage00" Grid.Column="0" Grid.Row="0" Margin="20,20,20,20" />
+
+
+        <Label Grid.Row="1" Grid.Column="0" Content="Выбранный эталон изображения"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Top"
+               Style="{StaticResource GreenLabelStyle}" 
+            />
+        <Image x:Name="cameraImageIdeal" Grid.Column="0" Grid.Row="1" Margin="20,20,20,20" />
+
+        <Label Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Content="Текущее изображение"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Top"
+        Style="{StaticResource GreenLabelStyle}" 
+     />
+        <Image x:Name="cameraImage02" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="2" Margin="20,20,20,20"/>
         <!--<cam:RotateImage x:Name="RotateImage1" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" Width="250" Height="150" VerticalAlignment="Center"  />-->
-        <Button Grid.Column="1" Grid.Row="2"
-            Content="Start/Stop Camera" Click="btnStartStop_Click" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
-        <Button Grid.Column="1" Grid.Row="2" Margin="200,0,0,0"
+        
+        <Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Style="{StaticResource GreenButtonStyle}"
+            Content="Start/Stop Camera" Click="btnStartStop_Click" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+        
+        <Button Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"  Style="{StaticResource GreenButtonStyle}"
             Content="SaveParams" Click="btnSaveParamsFromCameraImage" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
-        <Button Grid.Column="1" Grid.Row="2" Margin="0,0,200,0"
+        
+        <Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="1" Style="{StaticResource GreenButtonStyle}"
             Content="Standart" Click="click_get_standart_param" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
     </Grid>
 </UserControl>

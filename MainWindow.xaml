@@ -20,7 +20,7 @@
             <Setter Property="CornerRadius" Value="100"/>
         </Style>
     </Window.Resources>
-    <Grid Background="Green">
+    <Grid Background="SeaGreen">
         <cam:CameraViewer />
     </Grid>
 </Window>
