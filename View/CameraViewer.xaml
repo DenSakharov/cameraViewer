@@ -68,7 +68,12 @@
         VerticalAlignment="Top"
         Style="{StaticResource GreenLabelStyle}" 
      />
-        <Image x:Name="cameraImage02" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="2" Margin="20,20,20,20"/>
+
+        <ScrollViewer Name="imageScrollViewer" 
+                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="2" Margin="20,20,0,40">
+            <Image x:Name="cameraImage02" Stretch="None"/>
+            <!--Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="2" Margin="20,20,20,20"-->
+        </ScrollViewer>
         <!--<cam:RotateImage x:Name="RotateImage1" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" Width="250" Height="150" VerticalAlignment="Center"  />-->
         
         <Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Style="{StaticResource GreenButtonStyle}"
@@ -76,8 +81,11 @@
         
         <Button Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"  Style="{StaticResource GreenButtonStyle}"
             Content="SaveParams" Click="btnSaveParamsFromCameraImage" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
-        
-        <Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="1" Style="{StaticResource GreenButtonStyle}"
+
+        <ScrollBar x:Name="scaleScrollBar" Grid.Row="2" Grid.Column="2" VerticalAlignment="Bottom" Margin="40,0" ValueChanged="ScaleScrollBar_ValueChanged"
+                   Orientation="Horizontal" Maximum="10" Minimum="1" Value="1" SmallChange="0.1" LargeChange="0.2" />
+
+        <Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="1" Style="{StaticResource GreenButtonStyle}" 
             Content="Standart" Click="click_get_standart_param" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
     </Grid>
 </UserControl>

@@ -20,6 +20,8 @@ using LiveCharts.Wpf;
 using LiveCharts.Defaults;
 using System.Collections.ObjectModel;
 using camera.Model;
+using OpenCvSharp.WpfExtensions;
+using System;
 
 namespace camera.View
 {
@@ -442,6 +444,33 @@ namespace camera.View
                     var undistortedBitmapSource1 = MatToBitmapImage(correctedImage);
                     cameraImage02.Source = null;
                     cameraImage02.Source = undistortedBitmapSource1;
+
+                    double scaleFactor = scaleScrollBar.Value;
+
+                    // Получение BitmapSource из Source элемента управления cameraImage02
+                    BitmapSource bitmapSource = cameraImage02.Source as BitmapSource;
+
+                    if (bitmapSource != null)
+                    {
+                        // Создаем TransformedBitmap для изменения размеров
+                        TransformedBitmap transformedBitmap = new TransformedBitmap(bitmapSource,
+                            new ScaleTransform(scaleFactor, scaleFactor));
+
+                        // Конвертация TransformedBitmap в Mat
+                        Mat matNew = transformedBitmap.ToMat();
+
+                        // Отображение уменьшенного изображения
+                        undistortedBitmapSource1 = MatToBitmapImage(matNew);
+
+                        // Установка нового изображения в элемент управления Image
+                        cameraImage02.Source = undistortedBitmapSource1;
+
+                        // Обновление размеров элемента управления Image
+                        cameraImage02.Width = bitmapSource.PixelWidth * scaleFactor;
+                        cameraImage02.Height = bitmapSource.PixelHeight * scaleFactor;
+                    }
+
+                    //UpdateImage();
                 });
 
                 /// выделение цветов
@@ -478,6 +507,50 @@ namespace camera.View
                     }
                 });
             }
+        }
+        private async void UpdateImage()
+        {
+            if (cameraImage02 != null)
+            {
+                // Получение текущего значения масштаба из ползунка
+                double scaleFactor = scaleScrollBar.Value;
+                BitmapSource bitmapSource = cameraImage02.Source as BitmapSource;
+                if (scaleFactor<=0)
+                {
+                    scaleFactor = 1;
+                }
+                if (bitmapSource != null)
+                {
+                    cameraImage02.LayoutUpdated +=  (s, args) =>
+                    {
+                        Grid parentGrid = cameraImage02.Parent as Grid;
+
+                        if (parentGrid != null)
+                        {
+                            // Убедитесь, что размеры родительского Grid установлены и не равны NaN
+                            if (!double.IsNaN(parentGrid.ActualHeight) && !double.IsNaN(parentGrid.ActualWidth))
+                            {
+                                // Конвертация BitmapSource в Mat
+                                Mat matOld = bitmapSource.ToMat();
+                                // Уменьшение изображения с учетом масштаба
+                                Mat resizedImage = new Mat();
+                                Cv2.Resize(matOld, resizedImage, new Size(parentGrid.ActualWidth * scaleFactor, parentGrid.ActualHeight * scaleFactor), interpolation: InterpolationFlags.Linear);
+
+                                // Отображение уменьшенного изображения
+                                var undistortedBitmapSource1 = MatToBitmapImage(resizedImage);
+                                cameraImage02.Source = null;
+                                cameraImage02.Source = undistortedBitmapSource1;
+                            }
+                        }
+                    };
+                }
+            }
+        }
+
+        private void ScaleScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            // Обновление изображения при изменении значения ползунка
+            //UpdateImage();
         }
         void selected_contur(Mat matFrame)
         {
