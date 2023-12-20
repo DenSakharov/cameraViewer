@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:cam="clr-namespace:camera.View" 
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        Closing="Window_Closing"
+        >
     <Window.Resources>
         <!-- Стиль для зеленого фона -->
         <Style TargetType="Window">
@@ -21,6 +23,6 @@
         </Style>
     </Window.Resources>
     <Grid Background="SeaGreen">
-        <cam:CameraViewer />
+        <cam:CameraViewer x:Name="cameraElem"/>
     </Grid>
 </Window>

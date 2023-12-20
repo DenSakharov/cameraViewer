@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using camera.View;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,6 +20,11 @@ namespace camera
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            cameraElem.StopCamera();
         }
     }
 }

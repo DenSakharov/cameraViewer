@@ -82,7 +82,7 @@
         <Button Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"  Style="{StaticResource GreenButtonStyle}"
             Content="SaveParams" Click="btnSaveParamsFromCameraImage" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
 
-        <ScrollBar x:Name="scaleScrollBar" Grid.Row="2" Grid.Column="2" VerticalAlignment="Bottom" Margin="40,0" ValueChanged="ScaleScrollBar_ValueChanged"
+        <ScrollBar x:Name="scaleScrollBar" Grid.Row="2" Grid.Column="2" VerticalAlignment="Bottom" Margin="40,0" 
                    Orientation="Horizontal" Maximum="10" Minimum="1" Value="1" SmallChange="0.1" LargeChange="0.2" />
 
         <Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="1" Style="{StaticResource GreenButtonStyle}" 
