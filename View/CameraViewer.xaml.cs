@@ -5,14 +5,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using System.Drawing;
 using OpenCvSharp;
+using OpenCvSharp.WpfExtensions;
 using OpenCvSharp.Extensions;
 using System.IO;
 using System.Windows.Media;
 using Size = OpenCvSharp.Size;
 using System.Text;
 using camera.Model;
-using OpenCvSharp.WpfExtensions;
 using camera.Interfaces;
+using System.Windows.Forms;
 
 namespace camera.View
 {
@@ -44,7 +45,6 @@ namespace camera.View
             //videoSource = new VideoCaptureDevice(videoDevices[0].MonikerString);
             videoSource = new VideoCaptureDevice(videoDevices[0].MonikerString);
             videoSource.NewFrame += VideoSource_NewFrame;
-
             // Инициализируем таймер для обновления изображения
             timer1 = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             timer1.Tick += Timer_Tick;
@@ -87,8 +87,6 @@ namespace camera.View
         private readonly object lockObject = new object();
         private void VideoSource_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
-            lock (lockObject)
-            {
                 // Обновляем изображение в Image
                 if (stop && !new_stop)
                 {
@@ -460,7 +458,7 @@ namespace camera.View
                         }
                     });
                 }
-            }
+            
         }
         Point2f[] idealChessDesk;
         Mat homographyMatrixGlobalforImageWithoutChessDesk;// =new Mat();
@@ -501,11 +499,133 @@ namespace camera.View
             }
             if (homographyMatrixGlobalforImageWithoutChessDesk != null)
             {
+                using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                {
+                    saveFileDialog.Filter = "YAML files (*.yml)|*.yml|All files (*.*)|*.*";
+                    saveFileDialog.Title = "Выберите путь для сохранения матрицы гомографии";
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        string filePath = saveFileDialog.FileName;
+
+                        using (FileStorage fs = new FileStorage(filePath, FileStorage.Modes.Write))
+                        {
+                            fs.Write("homographyMatrixGlobalforImageWithoutChessDesk", homographyMatrixGlobalforImageWithoutChessDesk);
+                        }
+
+                        System.Windows.MessageBox.Show("Матрица сохранена успешно!");
+                    }
+                }
                 new_stop = true;
                 timer1.Stop();
 
                 timer1.Start();
                 refactor_image();
+            }
+        }
+        private void VideoSource_Frame_with_LoadParams(object sender, NewFrameEventArgs eventArgs) 
+        {
+            Dispatcher.Invoke(() =>
+            {
+                Mat matFrame0 = BitmapSourceToMat(BitmapToImageSource((Bitmap)eventArgs.Frame.Clone()));
+                var undistortedBitmapSource1 = MatToBitmapImage(matFrame0);
+                cameraImage00.Source = null;
+                cameraImage00.Source = undistortedBitmapSource1;
+            });
+
+            Mat matFrame = BitmapSourceToMat(BitmapToImageSource((Bitmap)eventArgs.Frame.Clone()));
+            Mat correctedImage = new Mat();
+            if (homographyMatrixGlobalforImageWithoutChessDesk.Type() != MatType.CV_32F && homographyMatrixGlobalforImageWithoutChessDesk.Type() != MatType.CV_64F)
+            {
+                return;
+            }
+            if (homographyMatrixGlobalforImageWithoutChessDesk.Rows != 3 || homographyMatrixGlobalforImageWithoutChessDesk.Cols != 3)
+            {
+                return;
+            }
+            Cv2.WarpPerspective(matFrame, correctedImage, homographyMatrixGlobalforImageWithoutChessDesk, new Size(correctedImage.Cols, correctedImage.Rows), flags: InterpolationFlags.Linear);
+
+            // Отображаем скорректированное изображение
+            Dispatcher.Invoke(() =>
+            {
+                var undistortedBitmapSource1 = MatToBitmapImage(correctedImage);
+                cameraImage02.Source = null;
+                cameraImage02.Source = undistortedBitmapSource1;
+
+                double scaleFactor = scaleScrollBar.Value;
+
+                // Получение BitmapSource из Source элемента управления cameraImage02
+                BitmapSource bitmapSource = cameraImage02.Source as BitmapSource;
+
+                if (bitmapSource != null)
+                {
+                    // Создаем TransformedBitmap для изменения размеров
+                    TransformedBitmap transformedBitmap = new TransformedBitmap(bitmapSource,
+                        new ScaleTransform(scaleFactor, scaleFactor));
+
+                    // Конвертация TransformedBitmap в Mat
+                    Mat matNew = transformedBitmap.ToMat();
+
+                    // Отображение уменьшенного изображения
+                    undistortedBitmapSource1 = MatToBitmapImage(matNew);
+
+                    // Установка нового изображения в элемент управления Image
+                    cameraImage02.Source = undistortedBitmapSource1;
+
+                    // Обновление размеров элемента управления Image
+                    cameraImage02.Width = bitmapSource.PixelWidth * scaleFactor;
+                    cameraImage02.Height = bitmapSource.PixelHeight * scaleFactor;
+                }
+            });
+        }
+        private void LoadMatrixButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                load_matrix();
+            }
+            catch (Exception ex){
+                System.Windows.MessageBox.Show("Error : \n"+ex);
+            }
+        }
+        void load_matrix()
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "YAML files (*.yml)|*.yml|All files (*.*)|*.*";
+                openFileDialog.Title = "Load Matrix File";
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string filePath = openFileDialog.FileName;
+
+                    using (FileStorage fsRead = new FileStorage(filePath, FileStorage.Modes.Read))
+                    {
+                        using (Mat mat = fsRead["homographyMatrixGlobalforImageWithoutChessDesk"].ReadMat())
+                        {
+                            if (mat != null)
+                            {
+                                homographyMatrixGlobalforImageWithoutChessDesk = mat.Clone();
+                            }
+                            else
+                            {
+                                System.Windows.MessageBox.Show("null!");
+                                return;
+                            }
+                        }
+                    }
+
+                    System.Windows.Forms.MessageBox.Show("Матрица загружена успешно.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    videoSource.NewFrame -= VideoSource_NewFrame;
+                    videoSource.NewFrame += VideoSource_Frame_with_LoadParams;
+                    timer1.Start();
+                }
+            }
+            if (!stop)
+            {
+                new_stop = false;
+                timer1.Start();
+                stop = true;
             }
         }
         void click_get_standart_param(object sender, RoutedEventArgs e)
