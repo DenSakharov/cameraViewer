@@ -2,17 +2,13 @@
 
 namespace camera.Model
 {
-    public class CameraParameters
+    public class CameraParametersModel
     {
-        public Mat HomographyMatrix { get; set; }
-        // Другие параметры камеры, если необходимо
+        private Mat _homographyMatrix;
 
-        // Конструктор по умолчанию для сериализации
-        public CameraParameters() { }
-
-        public CameraParameters(Mat homographyMatrix)
+        public CameraParametersModel(Mat homographyMatrix)
         {
-            HomographyMatrix = homographyMatrix;
+            _homographyMatrix = homographyMatrix;
         }
     }
 }

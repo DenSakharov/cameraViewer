@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="View\Pictures\camera.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AForge.Video" Version="2.2.5" />
     <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
     <PackageReference Include="Emgu.CV" Version="4.8.1.5350" />
@@ -20,11 +24,11 @@
     <PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
     <PackageReference Include="LiveCharts.Wpf.NetCore3" Version="0.9.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="OpenCvSharp4" Version="4.8.0.20230708" />
-    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.8.0.20230708" />
+    <PackageReference Include="OpenCvSharp4" Version="4.9.0.20240103" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.9.0.20240103" />
     <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.9.0.20240103" />
-    <PackageReference Include="OpenCvSharp4.Windows" Version="4.8.0.20230708" />
-    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.8.0.20230708" />
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.9.0.20240103" />
+    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.9.0.20240103" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,6 +53,10 @@
     <Reference Include="System.Windows.Forms.Primitives">
       <HintPath>..\..\..\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App\8.0.0\System.Windows.Forms.Primitives.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="View\Pictures\camera.png" />
   </ItemGroup>
 
 </Project>

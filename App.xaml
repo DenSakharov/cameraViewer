@@ -4,6 +4,8 @@
              xmlns:local="clr-namespace:camera"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <Style TargetType="Border">
+            <Setter Property="CornerRadius" Value="15"/>
+        </Style>
     </Application.Resources>
 </Application>

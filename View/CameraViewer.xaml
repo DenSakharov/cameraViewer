@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cam="clr-namespace:camera.View" 
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
+             d:DesignHeight="450" d:DesignWidth="900"
              Unloaded="OnUnloaded"
              >
     <UserControl.Resources>
@@ -38,7 +38,7 @@
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="1.1*"/>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
@@ -48,46 +48,55 @@
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Label Grid.Row="0" Grid.Column="0" Content="Исходное изображение"
-               HorizontalAlignment="Center"
+        <Label Name="label_image_source_2" Grid.Row="0" Grid.Column="0" Content=""
+               HorizontalAlignment="Left"
                VerticalAlignment="Top"
                Style="{StaticResource GreenLabelStyle}" 
             />
-        <Image x:Name="cameraImage00" Grid.Column="0" Grid.Row="0" Margin="20,20,20,20" />
+        <!--<Button Grid.Row="0" Grid.Column="0" Content="Показать" 
+               HorizontalAlignment="Right"
+               VerticalAlignment="Top" Click="click_switch_view"/>-->
+        <!--<Image x:Name="cameraImage00" Grid.Column="0" Grid.Row="0" Margin="20,30,20,20" />-->
 
 
-        <Label Grid.Row="1" Grid.Column="0" Content="Выбранный эталон изображения"
+        <!--<Label Grid.Row="1" Grid.Column="0" Content="Выбранный эталон изображения"
                HorizontalAlignment="Center"
                VerticalAlignment="Top"
                Style="{StaticResource GreenLabelStyle}" 
-            />
-        <Image x:Name="cameraImageIdeal" Grid.Column="0" Grid.Row="1" Margin="20,20,20,20" />
+            />-->
+        <!--<Image x:Name="cameraImageIdeal" Grid.Column="0" Grid.Row="1" Margin="20,20,20,20" />
 
         <Label Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Content="Текущее изображение"
         HorizontalAlignment="Center"
         VerticalAlignment="Top"
         Style="{StaticResource GreenLabelStyle}" 
-     />
+     />-->
 
         <ScrollViewer Name="imageScrollViewer" 
-                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="2" Margin="20,20,0,40">
+                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="3" Margin="5,5,5,40">
             <Image x:Name="cameraImage02" Stretch="None"/>
             <!--Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="2" Margin="20,20,20,20"-->
         </ScrollViewer>
         <!--<cam:RotateImage x:Name="RotateImage1" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" Width="250" Height="150" VerticalAlignment="Center"  />-->
         
-        <Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Style="{StaticResource GreenButtonStyle}"
-            Content="Start/Stop Camera" Click="btnStartStop_Click" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
-        
-        <Button Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"  Style="{StaticResource GreenButtonStyle}"
-            Content="SaveParams" Click="btnSaveParamsFromCameraImage" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
-        <Button Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"  Style="{StaticResource GreenButtonStyle}"
-    Content="LoadParams" Click="LoadMatrixButton_Click" HorizontalAlignment="Left" Margin="80,5" VerticalAlignment="Bottom"/>
+        <Button x:Name="start_stop_btn" Grid.Column="0" Grid.Row="2"  Style="{StaticResource GreenButtonStyle}"
+            Content="Start Camera" Click="btnStartStop_Click" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
 
-        <ScrollBar x:Name="scaleScrollBar" Grid.Row="2" Grid.Column="2" VerticalAlignment="Bottom" Margin="40,0" 
+        <Button Grid.Column="0" Grid.Row="2"   Style="{StaticResource GreenButtonStyle}"
+Content="Load Params" Click="LoadMatrixButton_Click" HorizontalAlignment="Left" Margin="90,5" VerticalAlignment="Bottom"/>
+        
+        <Button x:Name="buttonSaveParams"  Grid.Column="0" Grid.Row="2"   Style="{StaticResource GreenButtonStyle}"
+            Content="SaveParams" Click="btnSaveParamsFromCameraImage" HorizontalAlignment="Left" Margin="172,5,0,5" VerticalAlignment="Bottom"
+                IsEnabled="False"/>
+        <Button Grid.Column="0" Grid.Row="2"   Style="{StaticResource GreenButtonStyle}"
+     Click="take_picture" HorizontalAlignment="Left" Margin="255,5,0,5" VerticalAlignment="Bottom">
+            <Image Source="Pictures/camera.png" Width="30" Height="30"/>
+        </Button>
+
+        <ScrollBar x:Name="scaleScrollBar" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Margin="10,10" 
                    Orientation="Horizontal" Maximum="10" Minimum="1" Value="1" SmallChange="0.1" LargeChange="0.2" />
 
-        <Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="1" Style="{StaticResource GreenButtonStyle}" 
-            Content="Standart" Click="click_get_standart_param" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+        <!--<Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="1" Style="{StaticResource GreenButtonStyle}" 
+            Content="Standart" Click="click_get_standart_param" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>-->
     </Grid>
 </UserControl>
