@@ -408,6 +408,7 @@ namespace camera.View
                 start_stop_btn.Content = "Start Camera";
             }
         }
+        /*
         void unsubscribed()
         {
             // Получаем список всех обработчиков события NewFrame
@@ -420,6 +421,7 @@ namespace camera.View
             }
 
         }
+        */
         private void btnSaveParamsFromCameraImage(object sender, RoutedEventArgs e)
         {
             if (new_stop)
