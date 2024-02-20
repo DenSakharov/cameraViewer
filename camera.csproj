@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <None Remove="View\Pictures\camera.png" />
+    <None Remove="View\Pictures\icon.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,6 +58,9 @@
 
   <ItemGroup>
     <Resource Include="View\Pictures\camera.png" />
+    <Resource Include="View\Pictures\icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

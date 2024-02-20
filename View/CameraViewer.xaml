@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cam="clr-namespace:camera.View" 
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="900"
+             d:DesignHeight="450" d:DesignWidth="950"
              Unloaded="OnUnloaded"
              >
     <UserControl.Resources>
@@ -89,11 +89,16 @@ Content="Load Params" Click="LoadMatrixButton_Click" HorizontalAlignment="Left" 
             Content="SaveParams" Click="btnSaveParamsFromCameraImage" HorizontalAlignment="Left" Margin="172,5,0,5" VerticalAlignment="Bottom"
                 IsEnabled="False"/>
         <Button Grid.Column="0" Grid.Row="2"   Style="{StaticResource GreenButtonStyle}"
-     Click="take_picture" HorizontalAlignment="Left" Margin="255,5,0,5" VerticalAlignment="Bottom">
+     Click="take_picture" HorizontalAlignment="Right" Margin="0,0,20,5" VerticalAlignment="Bottom">
             <Image Source="Pictures/camera.png" Width="30" Height="30"/>
         </Button>
-
-        <ScrollBar x:Name="scaleScrollBar" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Margin="10,10" 
+        
+        <Button Grid.Column="1" Grid.Row="2"   Style="{StaticResource GreenButtonStyle}"
+    Click="remove_matrix" HorizontalAlignment="Left" Margin="0,0,5,5" VerticalAlignment="Bottom">
+            <Image Source="Pictures/icon.png" Width="30" Height="30"/>
+        </Button>
+        
+        <ScrollBar x:Name="scaleScrollBar" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Bottom" Margin="60,10,10,10" 
                    Orientation="Horizontal" Maximum="10" Minimum="1" Value="1" SmallChange="0.1" LargeChange="0.2" />
 
         <!--<Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="1" Style="{StaticResource GreenButtonStyle}" 

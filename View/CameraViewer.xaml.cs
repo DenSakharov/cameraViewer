@@ -597,7 +597,16 @@ namespace camera.View
                 stop = true;
             }
         }
-
+        void remove_matrix(object sender, EventArgs e) {
+            if (homographyMatrixGlobalforImageWithoutChessDesk != null)
+            {
+                timer1.Stop();
+                unsubscribed_from_events();
+                cameraImage02.Source = null;
+                homographyMatrixGlobalforImageWithoutChessDesk = null;
+                System.Windows.MessageBox.Show("Матрица очищена !");
+            }else { System.Windows.MessageBox.Show("Матрица отсутствует !"); }
+        }
         #region
         string selectedDirectory = "";
         /// <summary>
