@@ -31,19 +31,43 @@ namespace camera.View
         {
             InitializeComponent();
 
-            //delegates initialization
-            DelegateUtils.VideoSource_NewFrame_delegate_EventHandler delegate_VideoSource = VideoSource_NewFrame_Standart_View//VideoSource_NewFrame
+            connect_to_camera_devices();
+            Unloaded += CameraViewer_Unloaded;
+        }
+        DelegateUtils.VideoSource_NewFrame_delegate_EventHandler delegate_NewFrame_EventHandler;
+        DelegateUtils.Timer_Tick_delegate_EventHandler delegate_Timer_Tick;
+        DelegateUtils.VideoSource_Load_Matrix_delegate_EventHandler delegate_Load_Matrix_EventHandler;
+        void connect_to_camera_devices()
+        { //delegates initialization
+            delegate_NewFrame_EventHandler = VideoSource_NewFrame_Standart_View//VideoSource_NewFrame
                 ;
-            DelegateUtils.Timer_Tick_delegate_EventHandler delegate_Timer_Tick = Timer_Tick;
+            delegate_Load_Matrix_EventHandler = VideoSource_Frame_with_LoadParams;
+            delegate_Timer_Tick = Timer_Tick;
 
-            (videoDevices, videoSource, timer1) = ImageConvert.InitializeCamera(videoDevices, videoSource, timer1, delegate_VideoSource, delegate_Timer_Tick);
+            (videoDevices, videoSource, timer1) = ImageConvert.InitializeCamera(videoDevices, videoSource, timer1,
+                delegate_NewFrame_EventHandler, delegate_Timer_Tick);
             if (videoDevices == null || videoDevices.Count == 0)
             {
                 // Выводим сообщение о том, что камеры не обнаружены
                 System.Windows.MessageBox.Show("Камеры не обнаружены");
                 return;
             }
-            Unloaded += CameraViewer_Unloaded;
+        }
+        void unsubscribed_from_events()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (videoSource.IsRunning)
+                {
+                    videoSource.NewFrame -= new AForge.Video.NewFrameEventHandler(delegate_NewFrame_EventHandler);
+                    videoSource.NewFrame -= new AForge.Video.NewFrameEventHandler(delegate_Load_Matrix_EventHandler);
+                    //timer1.Tick -= new System.EventHandler(delegate_Timer_Tick);
+                    timer1.Stop();
+                    cameraImage02.Source = null;
+                }
+            });
+
+            //(videoDevices, videoSource, timer1) = ImageConvert.unsubscribed(videoDevices, videoSource, timer1, delegate_VideoSource, delegate_Timer_Tick);
         }
         /// <summary>
         /// Обработчик события для обработки кадров с видеоисточника с целью обнаружения и коррекции искажений, вызванных перспективой камеры, при условии использования калибровочной шахматной доски.
@@ -95,7 +119,7 @@ namespace camera.View
 
                         // Преобразуем Mat в BitmapSource и отобразим его
                         BitmapSource enlargedBitmapSource = ImageConvert.MatToBitmapImage(enlargedImage);
-                        cameraImage02.Source = enlargedBitmapSource;
+                        //cameraImage02.Source = enlargedBitmapSource;
 
                         patternSize = new Size(9, 6);
                         bool foundCornersTest = Cv2.FindChessboardCorners(matFrameTEST//enlargedImage
@@ -107,7 +131,7 @@ namespace camera.View
                            , cornersTest, foundCornersTest);
                             undistortedBitmapSource1 = ImageConvert.MatToBitmapImage(matFrameTEST//enlargedImage
                                 );
-                            cameraImage02.Source = undistortedBitmapSource1;
+                            //cameraImage02.Source = undistortedBitmapSource1;
                             #region getMatrixIdealChessDesk
                             string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Pictures", "idealChesss.png");
                             Mat matFrame = Cv2.ImRead(imagePath//"C:\\projects\\sharpCameraPrinter\\camera\\idealChesss.png"
@@ -380,17 +404,37 @@ namespace camera.View
         {
             if (start_stop_btn.Content == "Stop Camera")
             {
-                videoSource.NewFrame -= VideoSource_NewFrame_Standart_View;
-                videoSource.NewFrame -= VideoSource_Frame_with_LoadParams;
-                cameraImage02.Source = null;
                 timer1.Stop();
 
+                unsubscribed_from_events();
+
+                cameraImage02.Source = null;
+
                 start_stop_btn.Content = "Start Camera";
-                return;
             }
             // Запускаем таймер при нажатии на кнопку
+            else
+            {
+                if (homographyMatrixGlobalforImageWithoutChessDesk == null) {
+                    videoSource.NewFrame+= new AForge.Video.NewFrameEventHandler(delegate_NewFrame_EventHandler);
+                }else
+                {
+                    videoSource.NewFrame += new AForge.Video.NewFrameEventHandler(delegate_Load_Matrix_EventHandler);
+                }
+                timer1.Start();
+                //stop = true;
+                start_stop_btn.Content = "Stop Camera";
+            }
+            /*
             if (!stop)
             {
+                try {
+                    timer1.Tick -= Timer_Tick;
+                    timer1.Stop();
+                } catch (Exception ex)
+                {
+                    
+                }
                 //new_stop = false;
                 videoSource.NewFrame += VideoSource_NewFrame_Standart_View;
                 videoSource.NewFrame -= VideoSource_Frame_with_LoadParams;
@@ -407,6 +451,7 @@ namespace camera.View
                 timer1.Start();
                 start_stop_btn.Content = "Start Camera";
             }
+            */
         }
         /*
         void unsubscribed()
@@ -447,10 +492,9 @@ namespace camera.View
                         System.Windows.MessageBox.Show("Матрица сохранена успешно!");
                     }
                 }
-                //new_stop = true;
-                videoSource.NewFrame -= VideoSource_NewFrame_Standart_View;
-                videoSource.NewFrame += VideoSource_Frame_with_LoadParams;
                 timer1.Stop();
+                unsubscribed_from_events();
+                videoSource.NewFrame += new AForge.Video.NewFrameEventHandler(delegate_Load_Matrix_EventHandler);
                 timer1.Start();
             }
         }
@@ -502,6 +546,7 @@ namespace camera.View
             try
             {
                 load_matrix();
+                start_stop_btn.Content = "Stop Camera";
             }
             catch (Exception ex)
             {
@@ -541,9 +586,7 @@ namespace camera.View
                     //System.Windows.Forms.MessageBox.Show("Матрица загружена успешно.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     //переключение на обработку видео нового метода с заранее загруженной матрицей гомографии 
-                    videoSource = null;
-                    videoSource = new VideoCaptureDevice(videoDevices[0].MonikerString);
-                    videoSource.NewFrame += VideoSource_Frame_with_LoadParams;
+                    videoSource.NewFrame+= new AForge.Video.NewFrameEventHandler(delegate_Load_Matrix_EventHandler);
                     videoSource.Start();
                 }
             }
@@ -554,6 +597,7 @@ namespace camera.View
                 stop = true;
             }
         }
+
         #region
         string selectedDirectory = "";
         /// <summary>

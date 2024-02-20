@@ -7,10 +7,11 @@ using camera.Interfaces;
 using AForge.Video.DirectShow;
 using System.Windows.Threading;
 using camera.Delegates;
+using AForge.Video;
 
 namespace camera.Converters
 {
-    public class ImageConvert:IConverterCamera
+    public class ImageConvert : IConverterCamera
     {
         public static Mat BitmapSourceToMat(BitmapSource source)
         {
@@ -60,31 +61,48 @@ namespace camera.Converters
         /// - VideoCaptureDevice: источник видеопотока.
         /// - DispatcherTimer: таймер для обновления изображения.
         /// </returns>
-        public static (FilterInfoCollection, VideoCaptureDevice, DispatcherTimer) 
-            InitializeCamera(FilterInfoCollection videoDevices, VideoCaptureDevice videoSource, DispatcherTimer timer1, 
-            DelegateUtils.VideoSource_NewFrame_delegate_EventHandler videoSource_NewFrame_Delegate_EventHandler,DelegateUtils.Timer_Tick_delegate_EventHandler Timer_Tick)
+        public static (FilterInfoCollection, VideoCaptureDevice, DispatcherTimer)
+            InitializeCamera(FilterInfoCollection videoDevices, VideoCaptureDevice videoSource, DispatcherTimer timer1,
+            DelegateUtils.VideoSource_NewFrame_delegate_EventHandler videoSource_NewFrame_Delegate_EventHandler, 
+            DelegateUtils.Timer_Tick_delegate_EventHandler Timer_Tick)
         {
             videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
 
             if (videoDevices.Count == 0)
             {
                 System.Windows.MessageBox.Show("Камеры не обнаружены");
-                return (null,null,null);
+                return (null, null, null);
             }
 
             videoSource = new VideoCaptureDevice(videoDevices[0].MonikerString);
 
-            videoSource.NewFrame += (sender, eventArgs) =>
-            {
-                videoSource_NewFrame_Delegate_EventHandler(sender, eventArgs);
-            };
+            //videoSource.NewFrame += (sender, eventArgs) =>
+            //{
+            //    videoSource_NewFrame_Delegate_EventHandler(sender, eventArgs);
+            //};
             // Инициализируем таймер для обновления изображения
-            timer1 = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+            timer1 = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000) };
             timer1.Tick += (sender, eventArgs) =>
             {
                 Timer_Tick(sender, eventArgs);
             };
             return (videoDevices, videoSource, timer1);
+        }
+        public static (FilterInfoCollection, VideoCaptureDevice, DispatcherTimer)
+            unsubscribed
+            (FilterInfoCollection videoDevices, VideoCaptureDevice videoSource, DispatcherTimer timer1,
+              DelegateUtils.VideoSource_NewFrame_delegate_EventHandler videoSource_NewFrame_Delegate_EventHandler, DelegateUtils.Timer_Tick_delegate_EventHandler Timer_Tick)
+        {
+            videoSource.NewFrame -= (sender, eventArgs) =>
+            {
+                videoSource_NewFrame_Delegate_EventHandler(sender, eventArgs);
+            };
+            timer1.Tick -= (sender, eventArgs) =>
+            {
+                Timer_Tick(sender, eventArgs);
+            };
+            return (videoDevices, videoSource, timer1);
+
         }
         public static BitmapImage MatToBitmapImage(Mat mat)
         {
